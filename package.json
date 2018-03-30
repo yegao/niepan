@@ -1,0 +1,23 @@
+{
+  "name": "niepan",
+  "version": "1.0.0",
+  "description": "",
+  "main": "prop.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yegao/niepan.git"
+  },
+  "keywords": [
+    "niepan",
+    "prop"
+  ],
+  "author": "ygg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/yegao/niepan/issues"
+  },
+  "homepage": "https://github.com/yegao/niepan#readme"
+}

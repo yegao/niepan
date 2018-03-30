@@ -12,4 +12,5 @@
       return new init;
     }
   }
+  global.prop = prop;
 })(window,undefined);
