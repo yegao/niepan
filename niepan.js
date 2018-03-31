@@ -16,7 +16,20 @@
       }
       init.prototype = parent;
       return new init;
-    }
+    },
+    listeners:[],
+    sub:function(event,callback){
+      if(typeof callback === 'function'){
+        this.listeners[event] = callback;
+        console.log(this);
+      }
+    },
+    pub:function(event){
+      if(this.listeners[event]){
+        this.listeners[event]();
+      }
+    },
+
   }
   global.niepan = np;
 })(window);
