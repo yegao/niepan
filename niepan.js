@@ -18,4 +18,4 @@
     }
   }
   global.niepan = np;
-})(window,undefined);
+})(window);
