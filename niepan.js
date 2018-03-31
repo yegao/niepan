@@ -18,18 +18,25 @@
       return new init;
     },
     listeners:[],
-    sub:function(event,callback){
+    sub:function(event,callback,once){
       if(typeof callback === 'function'){
-        this.listeners[event] = callback;
+        this.listeners[event]={
+            callback : callback,
+            once:once
+        }
         console.log(this);
       }
     },
     pub:function(event){
       if(this.listeners[event]){
-        this.listeners[event]();
+        this.listeners[event].callback();
+        if(this.listeners[event].once){
+          delete this.listeners[event];
+        }
+      }else{
+        console.warn('not found event \''+event+'\',maybe it has been removed');
       }
-    },
-
+    }
   }
   global.niepan = np;
 })(window);

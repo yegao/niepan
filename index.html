@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Document</title>
-  <script src="prop.js"></script>
+  <script src="niepan.js"></script>
 </head>
 <body>
   <ul id="ul">
@@ -15,8 +15,16 @@
   </ul>
 </body>
 <script>
-  var o = prop();
+  var o = niepan();
   console.log(o);
+  o.sub('xx',function(){console.log('pub...')});
+  o.pub('xx');
+  o.pub('xx');
+  o.pub('xx');
+  o.sub('yy',function(){console.log('pub...')},true);
+  o.pub('yy');
+  o.pub('yy');
+  o.pub('yy');
   document.body.addEventListener('click',function(e){
       console.log('body');
   },true)
