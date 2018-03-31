@@ -8,6 +8,7 @@
     return np.prototype.create(np.prototype);
   }
   np.prototype = {
+    version:'1.0.0',
     copyright:'@yegao',
     create:function(parent,init){
       if(typeof init != 'function'){
