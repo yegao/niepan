@@ -8,6 +8,7 @@
     return np.prototype.create(np.prototype);
   }
   np.prototype = {
+    //内部静态变量,最好不要动
     version:'1.0.0',
     copyright:'@yegao',
     create:function(parent,init){
@@ -38,5 +39,18 @@
       }
     }
   }
-  global.niepan = np;
-})(window);
+  //global
+  if(global){
+    global.niepan = np;
+  }
+  //amd
+  if(typeof define === 'function' && define.amd){
+    define('niepan',[],function(){
+      return np;
+    })
+  }
+  //CommonJS
+  if(typeof module === 'object' && typeof module.exports === 'object'){
+    module.exports = np
+  }
+})(window || this);
