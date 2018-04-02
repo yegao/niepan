@@ -1,7 +1,6 @@
 {
   "name": "niepan",
-  "version": "1.0.1",
-  "description": "",
+  "version": "1.0.2",
   "main": "niepan.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -19,5 +18,6 @@
   "bugs": {
     "url": "https://github.com/yegao/niepan/issues"
   },
-  "homepage": "https://github.com/yegao/niepan#readme"
+  "homepage": "https://github.com/yegao/niepan#readme",
+  "description": ""
 }

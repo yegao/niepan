@@ -25,14 +25,21 @@
   o.pub('yy');
   o.pub('yy');
   o.pub('yy');
-  document.body.addEventListener('click',function(e){
-      console.log('body');
-  },true)
-  document.getElementById('ul').addEventListener('click',function(e){
-      console.log('ul');
-  })
-  document.getElementById('li1').addEventListener('click',function(e){
-      console.log('li');
-  })
+  o.request({
+    url:'http://localhost:8888',
+    success:function(res){
+      console.log(res);
+    }
+  });
+  // 事件流
+  // document.body.addEventListener('click',function(e){
+  //     console.log('body');
+  // },true)
+  // document.getElementById('ul').addEventListener('click',function(e){
+  //     console.log('ul');
+  // })
+  // document.getElementById('li1').addEventListener('click',function(e){
+  //     console.log('li');
+  // })
 </script>
 </html>
