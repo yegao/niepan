@@ -48,16 +48,16 @@
       }
       var url = o.url,
         method = o.method || 'GET',
-        success = o.success || function(){},
-        fail = o.fail || function(){};
+        success = o.success || function() {},
+        fail = o.fail || function() {};
       var xmlhttp = null;
       if (global.XMLHttpRequest) {
         xmlhttp = new XMLHttpRequest();
       } else if (window.ActiveXObject) { // for IE5 and IE6
         xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
       }
-      if(xmlhttp) {
-        xmlhttp.onreadystatechange = function(){
+      if (xmlhttp) {
+        xmlhttp.onreadystatechange = function() {
           if (xmlhttp.readyState == 4) { // 4 = "已经加载完成"
             if (xmlhttp.status == 200) { // 200 = "服务端成功处理"
               success(xmlhttp.response);
@@ -72,24 +72,28 @@
       } else {
         throw new Error("current environment does not support XMLHTTP!");
       }
-    },
-    get: function(url) {},
-    post: function(url) {}
+    }
   }
 
-  //global
+  //global、amd、cmd、Commonjs
   if (global) {
     global.niepan = np;
   }
-  //amd
-  if (typeof define === 'function' && define.amd) {
-    define('niepan', [], function() {
-      return np;
-    })
+  else if (typeof define === 'function') {
+    if (define.amd) {
+      define('niepan', [], function() {
+        return np;
+      })
+    } else if (define.cmd) {
+      define(function(require, exports, module) {
+        module.exports = np;
+      })
+    }
   }
-  //CommonJS
-  if (typeof module === 'object' && typeof module.exports === 'object') {
+  else if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = np
   }
-
+  else{
+    throw new Error('current environment do not support niepan');
+  }
 })(window || this);
