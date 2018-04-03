@@ -50,25 +50,28 @@
         method = o.method || 'GET',
         success = o.success || function() {},
         fail = o.fail || function() {};
-      var xmlhttp = null;
+      var xhr = null;
       if (global.XMLHttpRequest) {
-        xmlhttp = new XMLHttpRequest();
+        xhr = new XMLHttpRequest();
       } else if (window.ActiveXObject) { // for IE5 and IE6
-        xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        xhr = new ActiveXObject("Microsoft.XMLHTTP");
       }
-      if (xmlhttp) {
-        xmlhttp.onreadystatechange = function() {
-          if (xmlhttp.readyState == 4) { // 4 = "已经加载完成"
-            if (xmlhttp.status == 200) { // 200 = "服务端成功处理"
-              success(xmlhttp.response);
+      if (xhr) {
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) { // XMLHttpRequest.DONE
+            if (xhr.status == 200) { // 200 = "服务端成功处理"
+              success(xhr.response);
             } else {
               throw new Error("");
             }
           }
         };
-        xmlhttp.open(method, url, true);
-        xmlhttp.send(null);
-
+        xhr.open(method, url, true);
+        headers = o.headers || {'Content-Type':'application/x-www-form-urlencoded'};
+        headers.map(function(v,k){
+          xhr.setRequestHeader(k, v);
+        });
+        xhr.send(null);
       } else {
         throw new Error("current environment does not support XMLHTTP!");
       }
