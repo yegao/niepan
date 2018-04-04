@@ -5,7 +5,7 @@
   }
 
   //达到np()等价于new np()的目的
-  var np = function() {
+  let np = function() {
     return np.prototype.create(np.prototype);
   }
 
@@ -46,11 +46,11 @@
       if (!o.url) {
         throw new Error('niepan.request need url!');
       }
-      var url = o.url,
+      let url = o.url,
         method = o.method || 'GET',
         success = o.success || function() {},
         fail = o.fail || function() {};
-      var xhr = null;
+      let xhr = null;
       if (global.XMLHttpRequest) {
         xhr = new XMLHttpRequest();
       } else if (window.ActiveXObject) { // for IE5 and IE6
@@ -68,7 +68,7 @@
         };
         xhr.open(method, url, true);
         headers = o.headers || {'Content-Type':'application/x-www-form-urlencoded'};
-        headers.map(function(v,k){
+        headers.forEach(function(v,k){
           xhr.setRequestHeader(k, v);
         });
         xhr.send(null);

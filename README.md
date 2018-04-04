@@ -1,14 +1,16 @@
 # niepan
 ```javascript
 var np = niepan();
-##event
-
+```
+**event**
+```javascript
 np.sub('xyz',function(){
   console.log('xyz is happend');
 })
 np.pub('xyz');
-
-##http request
+```
+**http request**
+```javascript
 np.request({
   url:'https://server/xxx',
   success:function(res){
