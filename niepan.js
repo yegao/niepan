@@ -15,7 +15,7 @@
     create: function(prototype, elementOrFunction) {
       var init = function(){};
       init.prototype = prototype;
-      //第二个参数里面定义的element会覆盖第一个参数中的element
+      //baidu第二个参数里面定义的element会覆盖第一个参数中的element
       switch (typeof elementOrFunction) {
         case 'function':
           init = elementOrFunction;
@@ -47,7 +47,7 @@
       if (this.listeners[event]) {
         this.listeners[event].callback();
         if (this.listeners[event].once) {
-          devare this.listeners[event];
+          delete this.listeners[event];
         }
       } else {
         console.warn('not found event \'' + event + '\',maybe it has been removed');
