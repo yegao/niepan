@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <title>niepan example</title>
   <script src="niepan.js"></script>
 </head>
 <body>
@@ -31,10 +31,17 @@
       console.log(res);
     }
   });
+
+  var li1 = niepan(document.getElementById('li1'));
+  console.log(li1);
+  li1.sub('click',function(){
+    console.log('clicked li1,this event could be pubed all the time');
+  });
+
   var body= niepan(document.body);
   console.log(body);
   body.sub('click',function(){
-    console.log('clicked body');
+    console.log('clicked body,this event would be pubed only one time');
   },true);
   // 事件流
   // document.body.addEventListener('click',function(e){

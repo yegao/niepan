@@ -12,24 +12,15 @@
     //内部静态变量,最好不要动
     version: '1.0.0',
     copyright: '@yegao',
-    create: function(prototype, elementOrFunction) {
-      var init = function(){};
+    create: function(prototype, element) {
+      //实例属性
+      var init = function(){
+        this.element = element || null;
+        this.systemCallbacks = [];
+        this.listeners = [];
+      };
+      //原型属性
       init.prototype = prototype;
-      //baidu第二个参数里面定义的element会覆盖第一个参数中的element
-      switch (typeof elementOrFunction) {
-        case 'function':
-          init = elementOrFunction;
-          break;
-        case 'object':
-          init.prototype.element = elementOrFunction;
-          break;
-        default:
-          throw new Error('the parameter in niepan(elementOrFunction) should be a object or a function');
-      }
-      //反正niepan(elementOrFunction)生成的对象的原型链上肯定会有一个element属性,如果没有赋予element，element的值会是null
-      if(typeof init.prototype.element === 'undefined'){
-        init.prototype.element = null;
-      }
       return new init;
     },
     //event
@@ -37,9 +28,8 @@
     * 通过sub注册的事件如果是元素自带的系统事件，既可以通过pub触发也可以通过系统方式(比如点击鼠标)触发
     * 通过sub注册的事件如果是自定义的事件，只能通过pub触发
     */
-    systemCallbacks:[],
-    listeners: [],
     sub: function(event, callback, once) {
+      console.log(this.element,event);
       if (typeof callback === 'function') {
         //自定义事件
         this.listeners[event] = {
@@ -49,16 +39,19 @@
         }
         //系统事件
         if(this.listeners[event].system){
-          var systemCallback = this.systemCallbacks[this.listeners[event].system] = (function(){
+          var systemCallback = this.systemCallbacks[this.listeners[event].system] = (function(evt){
+            console.log(this,evt);
+            if(this.listeners[event].once){
+              delete this.systemCallbacks[this.listeners[event].system];
+              this.element.removeEventListener(event,systemCallback);
+            }
             this.pub(event);
-            this.element.removeEventListener(event,systemCallback);
           }).bind(this);
           this.element.addEventListener(event,systemCallback);
         }
       }
     },
     pub: function(event) {
-      //针对DOM1级别的事件
       if (this.listeners[event]) {
         this.listeners[event].callback();
         if (this.listeners[event].once) {
