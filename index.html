@@ -31,6 +31,11 @@
       console.log(res);
     }
   });
+  var body= niepan(document.body);
+  console.log(body);
+  body.sub('click',function(){
+    console.log('clicked body');
+  },true);
   // 事件流
   // document.body.addEventListener('click',function(e){
   //     console.log('body');

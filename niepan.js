@@ -26,27 +26,43 @@
         default:
           throw new Error('the parameter in niepan(elementOrFunction) should be a object or a function');
       }
-      //反正niepan(elementOrFunction)生成的对象的原型链上肯定会有一个element属性,再怎么样,值可能是null
+      //反正niepan(elementOrFunction)生成的对象的原型链上肯定会有一个element属性,如果没有赋予element，element的值会是null
       if(typeof init.prototype.element === 'undefined'){
         init.prototype.element = null;
       }
       return new init;
     },
     //event
+    /**
+    * 通过sub注册的事件如果是元素自带的系统事件，既可以通过pub触发也可以通过系统方式(比如点击鼠标)触发
+    * 通过sub注册的事件如果是自定义的事件，只能通过pub触发
+    */
+    systemCallbacks:[],
     listeners: [],
     sub: function(event, callback, once) {
       if (typeof callback === 'function') {
+        //自定义事件
         this.listeners[event] = {
-          callback: callback,
-          once: once
+          callback: callback,//事件回调方法
+          once: once,//是否只能被触发一次
+          system:this.element && ('on'+event in this.element) && Symbol(event),//是否是元素自带的系统事件
         }
-        console.log(this);
+        //系统事件
+        if(this.listeners[event].system){
+          var systemCallback = this.systemCallbacks[this.listeners[event].system] = (function(){
+            this.pub(event);
+            this.element.removeEventListener(event,systemCallback);
+          }).bind(this);
+          this.element.addEventListener(event,systemCallback);
+        }
       }
     },
     pub: function(event) {
+      //针对DOM1级别的事件
       if (this.listeners[event]) {
         this.listeners[event].callback();
         if (this.listeners[event].once) {
+          console.log('delete');
           delete this.listeners[event];
         }
       } else {
@@ -82,12 +98,14 @@
           }
         };
         xhr.open(method, url, true);
-        headers = o.headers || {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        };
-        headers.forEach(function(v, k) {
-          xhr.setRequestHeader(k, v);
-        });
+        if(o.headers && Object.prototype.toString.call(o.headers)==="[object Array]"){
+          // headers = o.headers || [{
+          //   'Content-Type': 'application/x-www-form-urlencoded'
+          // }];
+          headers.forEach(function(v, k) {
+            xhr.setRequestHeader(k, v);
+          });
+        }
         xhr.send(null);
       } else {
         throw new Error("current environment does not support XMLHTTP!");
