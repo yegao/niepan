@@ -4,19 +4,44 @@
     return;
   }
   //达到np()等价于new np()的目的
-  var np = function(elementOrFunction = null) {
-    return np.prototype.create(np.prototype, elementOrFunction);
+  var np = function(element = null) {
+    return np.prototype.create(np.prototype, element);
   }
   //原型属性
   np.prototype = {
     //内部静态变量,最好不要动
-    version: '1.0.0',
+    version: '1.0.7',
     copyright: '@yegao',
+    //@TODO finished 抽象语法树
+    ast:function(str){
+      //如果str是多个并列的个节点，需要提示一下
+      console.warn('the ast get multiple trees');
+      return ;
+    },
+    //@TODO需不需要将
+    append: function(elementOrString, parentNode) {
+      if (!parentNode || typeof parentNode != 'object') {
+        throw new Error('you append a element to a undefined parent node');
+      }
+      switch (typeof elementOrString) {
+        case 'object':
+          return parentNode.appendChild(elementOrString);
+        case 'string':
+          parentNode.innerHTML += elementOrString;
+          return ast(elementOrString)
+        default:
+          throw new Error('you append a element to a undefined parent node');
+      }
+    },
+    //@TODO 是否需要合并重复的niepan,脏检查或者直接将元素上的事件就直接放到元素上，仔细一想也没什么必要...待定
     create: function(prototype, element) {
       //实例属性
-      var init = function(){
+      var init = function() {
+        //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
         this.element = element || null;
-        this.systemCallbacks = [];
+        //元素原本就有的事件监听类型
+        this.originals = [];
+        //listeners = originals + unoriginals
         this.listeners = [];
       };
       //原型属性
@@ -29,25 +54,25 @@
     * 通过sub注册的事件如果是自定义的事件，只能通过pub触发
     */
     sub: function(event, callback, once) {
-      console.log(this.element,event);
+      console.log(this.element, event);
       if (typeof callback === 'function') {
         //自定义事件
         this.listeners[event] = {
-          callback: callback,//事件回调方法
-          once: once,//是否只能被触发一次
-          system:this.element && ('on'+event in this.element) && Symbol(event),//是否是元素自带的系统事件
+          callback: callback, //事件回调方法
+          once: once, //是否只能被触发一次
+          system: this.element && ('on' + event in this.element) && Symbol(event) //是否是元素自带的系统事件
         }
         //系统事件
-        if(this.listeners[event].system){
-          var systemCallback = this.systemCallbacks[this.listeners[event].system] = (function(evt){
-            console.log(this,evt);
-            if(this.listeners[event].once){
-              delete this.systemCallbacks[this.listeners[event].system];
-              this.element.removeEventListener(event,systemCallback);
+        if (this.listeners[event].system) {
+          var systemCallback = this.originals[this.listeners[event].system] = (function(evt) {
+            console.log(this, evt);
+            if (this.listeners[event].once) {
+              delete this.originals[this.listeners[event].system];
+              this.element.removeEventListener(event, systemCallback);
             }
             this.pub(event);
           }).bind(this);
-          this.element.addEventListener(event,systemCallback);
+          this.element.addEventListener(event, systemCallback);
         }
       }
     },
@@ -65,6 +90,7 @@
     once: function(event, callback) {
       this.sub(event, callback, true);
     },
+    status: function() {},
     //http
     request: function(o) {
       if (!o.url) {
@@ -91,7 +117,7 @@
           }
         };
         xhr.open(method, url, true);
-        if(o.headers && Object.prototype.toString.call(o.headers)==="[object Array]"){
+        if (o.headers && Object.prototype.toString.call(o.headers) === "[object Array]") {
           // headers = o.headers || [{
           //   'Content-Type': 'application/x-www-form-urlencoded'
           // }];
@@ -105,7 +131,6 @@
       }
     }
   }
-
   //global、amd、cmd、Commonjs
   if (global) {
     global.niepan = np;
