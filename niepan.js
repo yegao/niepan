@@ -18,7 +18,7 @@
       console.warn('the ast get multiple trees');
       return ;
     },
-    //@TODO需不需要将
+    //@TODO需不需要将插入的子节点转成niepan,或者是添加一个参数来控制?
     append: function(elementOrString, parentNode) {
       if (!parentNode || typeof parentNode != 'object') {
         throw new Error('you append a element to a undefined parent node');
