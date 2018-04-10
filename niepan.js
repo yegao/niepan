@@ -129,6 +129,17 @@
       } else {
         throw new Error("current environment does not support XMLHTTP!");
       }
+    },
+    animate:function(fn,time){
+      function step(){
+        fn();
+        if(global.requestAnimationFrame){
+          global.requestAnimationFrameraf(step);
+        }
+        else{
+          setTimeout(step,time)
+        }
+      }
     }
   }
   //global、amd、cmd、Commonjs
