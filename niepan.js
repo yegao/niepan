@@ -12,7 +12,7 @@
     //内部静态变量,最好不要动
     version: '1.0.7',
     copyright: '@yegao',
-    //@TODO finished 抽象语法树
+    //@TODO 抽象语法树
     ast:function(str){
       //如果str是多个并列的个节点，需要提示一下
       console.warn('the ast get multiple trees');
@@ -35,7 +35,7 @@
     },
     //@TODO 是否需要合并重复的niepan,脏检查或者直接将元素上的事件就直接放到元素上，仔细一想也没什么必要...待定
     create: function(prototype, element) {
-      //实例属性
+      // 实例属性
       var init = function() {
         //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
         this.element = element || null;
@@ -43,12 +43,20 @@
         this.originals = [];
         //listeners = originals + unoriginals
         this.listeners = [];
+        this.status = {};
+        this.set = function(k,v){
+          this.status[k] = v;
+          return this.status;
+        };
+        this.get = function(k){
+          return this.status[k];
+        }
       };
-      //原型属性
+      // 原型属性
       init.prototype = prototype;
       return new init;
     },
-    //event
+    // 事件
     /**
     * 通过sub注册的事件如果是元素自带的系统事件，既可以通过pub触发也可以通过系统方式(比如点击鼠标)触发
     * 通过sub注册的事件如果是自定义的事件，只能通过pub触发
@@ -90,8 +98,7 @@
     once: function(event, callback) {
       this.sub(event, callback, true);
     },
-    status: function() {},
-    //http
+    // 请求
     request: function(o) {
       if (!o.url) {
         throw new Error('niepan.request need url!');
@@ -130,9 +137,12 @@
         throw new Error("current environment does not support XMLHTTP!");
       }
     },
+    // 动画
     animate:function(fn,time){
       function step(){
-        fn();
+        if(typeof fn === 'function'){
+          fn();
+        }
         if(global.requestAnimationFrame){
           global.requestAnimationFrameraf(step);
         }
@@ -140,6 +150,54 @@
           setTimeout(step,time)
         }
       }
+    },
+    // 双向绑定
+    // mvvm:{
+    //     target:$niepan$
+    // },
+    // 文件上传
+    // file:function(resource,callback){
+    //   if(callback){
+    //     callback();
+    //   }
+    //   return {
+    //     progress:0,
+    //     url:''
+    //   }
+    // },
+    // MutationObserver 的不同兼容性写法
+    MutationObserver: global.MutationObserver || global.WebKitMutationObserver || global.MozMutationObserver,
+    // 该构造函数用来实例化一个新的 Mutation 观察者对象
+    // Mutation 观察者对象能监听在某个范围内的 DOM 树变化
+    obeserve:function(){
+      var observer = new this.MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+          // 返回被添加的节点,或者为null.
+          var nodes = mutation.addedNodes;
+          for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            if (blacks.test(node.src)){
+              try {
+                node.parentNode.removeChild(node);
+                console.log('拦截可疑静态脚本:', node.src);
+              } catch (e) {}
+            }
+          }
+        });
+      });
+      // 传入目标节点和观察选项
+      // 如果 target 为 document 或者 document.documentElement
+      // 则当前文档中所有的节点添加与删除操作都会被观察到
+      observer.observe(document, {
+        subtree: true,
+        childList: true
+      });
+    },
+    // 防止xss攻击
+    notxss:{
+      keywords:[],//检测的关键字符
+      withelist:[],//白名单列表
+      blacks:[],//黑名单列表
     }
   }
   //global、amd、cmd、Commonjs
