@@ -166,21 +166,22 @@
     //   }
     // },
     // MutationObserver 的不同兼容性写法
-    MutationObserver: global.MutationObserver || global.WebKitMutationObserver || global.MozMutationObserver,
     // 该构造函数用来实例化一个新的 Mutation 观察者对象
     // Mutation 观察者对象能监听在某个范围内的 DOM 树变化
     obeserve:function(){
-      var observer = new this.MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          // 返回被添加的节点,或者为null.
-          var nodes = mutation.addedNodes;
+      var MutationObserver = global.MutationObserver || global.WebKitMutationObserver || global.MozMutationObserver;
+      var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(v) {
+          var nodes = v.addedNodes;
           for (var i = 0; i < nodes.length; i++) {
             var node = nodes[i];
-            if (blacks.test(node.src)){
+            if (this.notxss.blacks.indexOf(node.src) != -1){
               try {
                 node.parentNode.removeChild(node);
                 console.log('拦截可疑静态脚本:', node.src);
-              } catch (e) {}
+              } catch (e) {
+                console.warn(e);
+              }
             }
           }
         });
