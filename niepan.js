@@ -13,10 +13,41 @@
     version: '1.0.7',
     copyright: '@yegao',
     //@TODO 抽象语法树
-    ast:function(str){
-      //如果str是多个并列的个节点，需要提示一下
-      console.warn('the ast get multiple trees');
-      return ;
+    ast:function(element,_index,_res){
+      // if(Object.prototype.toString.call(element) === "[object Array]"){
+      //   console.warn('the ast get multiple trees');
+      //   return ;
+      // }
+      if(!element){
+        return;
+      }
+/*
+·[3]
+·[2]            ·[2]                            ·[4]
+·[3]            ·[3]            ·[3]            ·[2]        ·[2]        ·[0]    ·[1]
+·[0]·[0]·[0]    ·[0]·[0]·[0]    ·[0]·[0]·[0]    ·[0]·[0]    ·[0]·[0]            ·[0]
+*/
+
+
+
+      var index = _index || 0;
+      var res = _res || [];
+      //nodeType 1的比如img的childElementCount为0 nodeType为3的txt没有childElementCount
+      if(element.childElementCount){
+        var children = element.childNodes;
+        for(var index of children){
+          var child = children[index];
+          child.index = element.index+'|'+index;
+          return this.ast(child,res);
+        }
+      }
+      res.push({
+        nodeName:element.nodeName,
+        childNodes:element.childNodes,
+        parent:parentIndex || 0,
+        nodeType:element.nodeType
+      });
+      return res;
     },
     //@TODO需不需要将插入的子节点转成niepan,或者是添加一个参数来控制?
     append: function(elementOrString, parentNode) {
