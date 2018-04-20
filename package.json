@@ -19,5 +19,8 @@
     "url": "https://github.com/yegao/niepan/issues"
   },
   "homepage": "https://github.com/yegao/niepan#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "mustache": "^2.3.0"
+  }
 }
