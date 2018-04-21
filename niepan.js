@@ -91,6 +91,18 @@
         this.originals = [];
         //listeners = originals + unoriginals
         this.listeners = [];
+        //watch 实现双向绑定
+        var watch = element.getAttribute('watch');
+        if(watch){
+          if(typeof watch != 'string'){
+            throw new Error('the attribute "watch" should be a string!');
+          }
+          var tag = element.tagName.toLocaleLowerCase();
+          if(tag == 'input' || tag == 'textarea'){
+
+          }
+        }
+        //状态
         this.status = {};
         this.set = function(k,v){
           this.status[k] = v;
@@ -118,14 +130,23 @@
         this.listeners[event] = {
           callback: callback, //事件回调方法
           once: once, //是否只能被触发一次
-          system: this.element && ('on' + event in this.element) && Symbol(event) //是否是元素自带的系统事件
+          system: this.element && ('on' + event in this.element) && Symbol(event) //是否是元素自带的系统事件,是则返回一个Symbol
         }
         //系统事件
-        if (this.listeners[event].system) {
-          var systemCallback = this.originals[this.listeners[event].system] = (function(evt) {
+        var systemSymbol = this.listeners[event].system;
+        if (systemSymbol) {
+          var systemCallback = this.originals[systemSymbol] = (function(evt) {
+            if(event=='input' && this.watch){
+              //@TODO: 
+              //直接将watch绑定到niepan的原型属性上
+              //这样有好处也有坏处
+              //好处是轻松地解决了跨组件之间变量不能互相通用的问题
+              //坏处是没有隔离不同组件之间不同变量的通讯
+              this.data[watch] = evt.target.value;
+            }
             console.log(this, evt);
             if (this.listeners[event].once) {
-              delete this.originals[this.listeners[event].system];
+              delete this.originals[systemSymbol];
               this.element.removeEventListener(event, systemCallback);
             }
             this.pub(event);
