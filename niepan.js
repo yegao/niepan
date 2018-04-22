@@ -83,10 +83,12 @@
      * @return {object}           生成的niepan
      */
     create: function(prototype, element) {
-      if(element && element.$np){
-        throw new Error('this element has been a niepan');
+      if(element){
+        if(element.$np){
+          throw new Error('this element has been a niepan');
+        }
+        element.$np = true;
       }
-      element.$np = true;
       // 实例属性都有一个$符号,和原型属性作区分
       var init = function() {
         //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
