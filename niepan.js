@@ -83,10 +83,14 @@
      * @return {object}           生成的niepan
      */
     create: function(prototype, element) {
+      if(element && element.$np){
+        throw new Error('this element has been a niepan');
+      }
+      element.$np = true;
       // 实例属性都有一个$符号,和原型属性作区分
       var init = function() {
         //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
-        this.$element = element || null;
+        this.$element = element;
         //当前实例绑定的变量全部放在$data中
         this.$data = {};
         //元素原本就有的事件监听类型
