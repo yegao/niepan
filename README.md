@@ -25,9 +25,10 @@ body.sub('click',function(){
 },true);
 ```
 
-// It will throw a error when define a niepan for the same element moe than one time;
+It will throw a error when define a niepan for the same element moe than one time;
 ```javascript
-var input2 = niepan(document.getElementById('input1'));//ERROR
+var input = niepan(document.getElementById('input1'));
+var input = niepan(document.getElementById('input1'));//ERROR
 ```
 **http request**
 ```javascript
