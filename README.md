@@ -33,3 +33,13 @@ np.request({
   }
 });
 ```
+**two-way data-binding**
+```html
+<input id="input1" type="text" value="" watch="name" placeholder="place input your name" />
+```
+```javascript
+var input1 = niepan(document.getElementById('input1'));
+input1.sub('input',function(evt){
+  console.log(input1.$data.name);
+});
+```
