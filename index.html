@@ -53,7 +53,8 @@
   input1.sub('input',function(evt){
     console.log(input1.$data.name);
   });
-  var input2 = niepan(document.getElementById('input1'));
+  // It will throw a error when define a niepan for the same element moe than one time;
+  // var input2 = niepan(document.getElementById('input1'));
   // 事件流
   // document.body.addEventListener('click',function(e){
   //     console.log('body');

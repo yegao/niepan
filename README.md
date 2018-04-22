@@ -24,6 +24,11 @@ body.sub('click',function(){
   console.log('clicked body,this event would be pubed only one time');
 },true);
 ```
+
+// It will throw a error when define a niepan for the same element moe than one time;
+```javascript
+var input2 = niepan(document.getElementById('input1'));//ERROR
+```
 **http request**
 ```javascript
 np.request({
