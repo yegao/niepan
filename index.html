@@ -11,8 +11,9 @@
   <ul id="ul">
     <li id="li1">1</li>
     <li id="li2">2</li>
-    <li id="li3">3</li>
+    <li id="li3" watch="age">3</li>
   </ul>
+  <input id="input1" type="text" value="" watch="name" placeholder="place input your name" />
 </body>
 <script>
   var o = niepan();
@@ -43,6 +44,14 @@
   body.sub('click',function(){
     console.log('clicked body,this event would be pubed only one time');
   },true);
+
+  var li3 = niepan(document.getElementById('li3'));
+  console.log(li3.$data.age);
+
+  var input1 = niepan(document.getElementById('input1'));
+  // input1.sub('input',function(evt){
+  //   console.log(input1.$data.name);
+  // });
   // 事件流
   // document.body.addEventListener('click',function(e){
   //     console.log('body');

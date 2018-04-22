@@ -83,33 +83,44 @@
      * @return {object}           生成的niepan
      */
     create: function(prototype, element) {
-      // 实例属性
+      // 实例属性都有一个$符号,和原型属性作区分
       var init = function() {
         //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
-        this.element = element || null;
+        this.$element = element || null;
+        //当前实例绑定的变量全部放在$data中
+        this.$data = {};
         //元素原本就有的事件监听类型
-        this.originals = [];
+        this.$originals = [];
         //listeners = originals + unoriginals
-        this.listeners = [];
+        this.$listeners = [];
         //watch 实现双向绑定
-        var watch = element.getAttribute('watch');
-        if(watch){
-          if(typeof watch != 'string'){
+        this.$watch = element && element.getAttribute('watch');
+        if(this.$watch){
+          if(typeof this.$watch != 'string'){
             throw new Error('the attribute "watch" should be a string!');
           }
-          var tag = element.tagName.toLocaleLowerCase();
-          if(tag == 'input' || tag == 'textarea'){
-
-          }
+          // 发现不能重写element.__proto__.value的setter方法（native code）
+          // console.log(Object.getOwnPropertyDescriptor(this.$element.constructor.prototype,'value').set);
+          // Object.getOwnPropertyDescriptor(this.$element.constructor.prototype,'value').set = function(){
+          //   console.log('xxx');
+          // }
+          Object.defineProperty(this.$data,this.$watch,{
+            set:(function(v){
+              this.$element.value = v;
+            }).bind(this),
+            get:(function(){
+              return this.$element.value;
+            }).bind(this)
+          })
         }
         //状态
-        this.status = {};
-        this.set = function(k,v){
-          this.status[k] = v;
-          return this.status;
+        this.$status = {};
+        this.$set = function(k,v){
+          this.$status[k] = v;
+          return this.$status;
         };
-        this.get = function(k){
-          return this.status[k];
+        this.$get = function(k){
+          return this.$status[k];
         }
       };
       // 原型属性
@@ -124,34 +135,26 @@
     * @param  {[type]}   once     该事件被触发一次之后是否被销毁
     */
     sub: function(event, callback, once) {
-      console.log(this.element, event);
+      // console.log(this.$element, event);
       if (typeof callback === 'function') {
         //自定义事件
-        this.listeners[event] = {
+        this.$listeners[event] = {
           callback: callback, //事件回调方法
           once: once, //是否只能被触发一次
-          system: this.element && ('on' + event in this.element) && Symbol(event) //是否是元素自带的系统事件,是则返回一个Symbol
+          system: this.$element && ('on' + event in this.$element) && Symbol(event) //是否是元素自带的系统事件,是则返回一个Symbol
         }
         //系统事件
-        var systemSymbol = this.listeners[event].system;
+        var systemSymbol = this.$listeners[event].system;
         if (systemSymbol) {
-          var systemCallback = this.originals[systemSymbol] = (function(evt) {
-            if(event=='input' && this.watch){
-              //@TODO: 
-              //直接将watch绑定到niepan的原型属性上
-              //这样有好处也有坏处
-              //好处是轻松地解决了跨组件之间变量不能互相通用的问题
-              //坏处是没有隔离不同组件之间不同变量的通讯
-              this.data[watch] = evt.target.value;
-            }
-            console.log(this, evt);
-            if (this.listeners[event].once) {
-              delete this.originals[systemSymbol];
-              this.element.removeEventListener(event, systemCallback);
+          var systemCallback = this.$originals[systemSymbol] = (function(evt) {
+            // console.log(this, evt);
+            if (this.$listeners[event].once) {
+              delete this.$originals[systemSymbol];
+              this.$element.removeEventListener(event, systemCallback);
             }
             this.pub(event);
           }).bind(this);
-          this.element.addEventListener(event, systemCallback);
+          this.$element.addEventListener(event, systemCallback);
         }
       }
     },
@@ -160,11 +163,11 @@
      * @param  {string} event 事件名
      */
     pub: function(event) {
-      if (this.listeners[event]) {
-        this.listeners[event].callback();
-        if (this.listeners[event].once) {
+      if (this.$listeners[event]) {
+        this.$listeners[event].callback();
+        if (this.$listeners[event].once) {
           console.log('delete');
-          delete this.listeners[event];
+          delete this.$listeners[event];
         }
       } else {
         console.warn('not found event \'' + event + '\',maybe it has been removed');
@@ -238,10 +241,6 @@
         }
       }
     },
-    // 双向绑定
-    // mvvm:{
-    //     target:$niepan$
-    // },
     // 文件上传
     // file:function(resource,callback){
     //   if(callback){
