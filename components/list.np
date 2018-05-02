@@ -1,0 +1,9 @@
+<np name="list">
+<ul id="npcomponent">
+  <li>np1</li>
+  <li>np2</li>
+</ul>
+</np>
+<style>
+
+</style>
