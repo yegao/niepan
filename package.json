@@ -61,7 +61,8 @@
     "webpack-merge": "^4.1.0"
   },
   "devDependencies": {
-    "np-loader": "^1.0.0"
+    "np-loader": "^1.0.0",
+    "np-webpack-plugin": "^1.0.2"
   },
   "engines": {
     "node": ">= 6.0.0",

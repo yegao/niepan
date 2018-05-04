@@ -1,3 +1,4 @@
+//np-loader会
 var content = require('./index.np');
 console.log(content);
 const niepan = require('./niepan.js');
