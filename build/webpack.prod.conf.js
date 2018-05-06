@@ -28,6 +28,32 @@ const webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath('js/[name].[chunkhash].js'),
     chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
   },
+  optimization: {
+    splitChunks: {
+      chunks: "all",
+      minSize: 30,
+      minChunks: 1,
+      maxAsyncRequests: 5,
+      maxInitialRequests: 3,
+      name: "vendor",
+      cacheGroups: {
+        // default: {
+        //   minChunks: 2,
+        //   priority: -20,
+        //   reuseExistingChunk: true
+        // },
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10
+        },
+        app:{
+          chunk:'async',
+          name:'vendor-async'
+        }
+      }
+    },
+    runtimeChunk:true
+  },
   plugins: [
     new NpWebpackPlugin(),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
@@ -80,35 +106,38 @@ const webpackConfig = merge(baseWebpackConfig, {
     new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
     new webpack.optimize.ModuleConcatenationPlugin(),
-    // split vendor js into its own file
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks (module) {
-        // any required modules inside node_modules are extracted to vendor
-        return (
-          module.resource &&
-          /\.js$/.test(module.resource) &&
-          module.resource.indexOf(
-            path.join(__dirname, '../node_modules')
-          ) === 0
-        )
-      }
-    }),
-    // extract webpack runtime and module manifest to its own file in order to
-    // prevent vendor hash from being updated whenever app bundle is updated
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest',
-      minChunks: Infinity
-    }),
-    // This instance extracts shared chunks from code splitted chunks and bundles them
-    // in a separate chunk, similar to the vendor chunk
-    // see: https://webpack.js.org/plugins/commons-chunk-plugin/#extra-async-commons-chunk
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'app',
-      async: 'vendor-async',
-      children: true,
-      minChunks: 3
-    }),
+
+    // 扫描vendor,没有找到vendor这个entry chunk,于是创建一个vendor的chunk
+    // 将来自node_modules中的module都放入其中
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'vendor',
+    //   minChunks (module) {
+    //     return (
+    //       module.resource  &&
+    //       /\.js$/.test(module.resource) &&
+    //       module.resource.indexOf(
+    //         path.join(__dirname, '../node_modules')
+    //       ) === 0
+    //     )
+    //   }
+    // }),
+
+    // webpack中默认就有一个manifest的chunk,其中存放的是webpack运行时的代码。
+    // 将运行时代码提取出来,避免因为app bundle发生改变而导致vendor的hash也被改变
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'manifest',
+    //   minChunks: Infinity
+    // }),
+
+    // 扫描app,找到了app这个entry chunk
+    // 于是将其直接子chunk里把出现次数不少于3次的模块提取出来
+    // 放到一个叫vendor-async的懒加载模块中去
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'app',
+    //   async: 'vendor-async',
+    //   children: true,
+    //   minChunks: 3
+    // }),
 
     // copy custom static assets
     new CopyWebpackPlugin([
