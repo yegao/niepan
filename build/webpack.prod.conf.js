@@ -46,10 +46,10 @@ const webpackConfig = merge(baseWebpackConfig, {
           test: /[\\/]node_modules[\\/]/,
           priority: -10
         },
-        app:{
-          chunk:'async',
-          name:'vendor-async'
-        }
+        // app:{
+        //   chunk:'async',
+        //   name:'vendor-async'
+        // }
       }
     },
     runtimeChunk:true
