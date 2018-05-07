@@ -1,0 +1,14 @@
+{
+  "presets":[
+    [
+      "env",{
+      "include": ["transform-es2015-arrow-functions", "es6.map"],
+      "exclude": ["transform-regenerator", "es6.set"]
+    }]
+  ],
+  "plugins": [
+    ["transform-object-rest-spread", { "useBuiltIns": true }],
+    ["transform-class-properties", { "spec": true }],
+    ["transform-export-extensions"]
+  ]
+}
