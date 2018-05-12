@@ -124,6 +124,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     //   }
     // }),
 
+
     // webpack中默认就有一个manifest的chunk,其中存放的是webpack运行时的代码。
     // 将运行时代码提取出来,避免因为app bundle发生改变而导致vendor的hash也被改变
     // new webpack.optimize.CommonsChunkPlugin({
