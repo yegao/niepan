@@ -5,6 +5,10 @@ const config = require('../config')
 const merge = require('webpack-merge')//object.assign只是浅拷贝，webpack-merge是会检测webpack属性并选择最优的合并方案的
 const path = require('path')
 const baseWebpackConfig = require('./webpack.base.conf')
+
+const npWebpackPlugin = require('np-webpack-plugin')
+
+
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
@@ -54,12 +58,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     hot: true,
     contentBase: false, // since we use CopyWebpackPlugin.
     compress: true,
-    host: HOST || config.dev.host,
-    port: PORT || config.dev.port,
-    open: config.dev.autoOpenBrowser,
-    overlay: config.dev.errorOverlay
-      ? { warnings: false, errors: true }
-      : false,
+    host: HOST || config.dev.host, // 'localhost'
+    port: PORT || config.dev.port, // 8080
+    open: config.dev.autoOpenBrowser, // false //webpack-dev-server之后是否自动在浏览器中打开
+    overlay: config.dev.errorOverlay ? { warnings: false, errors: true } : false,
     publicPath: config.dev.assetsPublicPath,
     proxy: config.dev.proxyTable,
     quiet: true, // necessary for FriendlyErrorsPlugin
@@ -80,6 +82,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       template: 'index.html',
       inject: true
     }),
+    new npWebpackPlugin(),
     // copy custom static assets
     // from    定义要拷贝的源目录
     // to      定义要拷贝到的目标目录
@@ -91,7 +94,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     new CopyWebpackPlugin([
       {
         from: path.resolve(__dirname, '../static'),
-        to: config.dev.assetsSubDirectory,
+        to: config.dev.assetsSubDirectory,    // 'static'
         ignore: ['.*']
       }
     ])
@@ -104,13 +107,8 @@ module.exports = new Promise((resolve, reject) => {
     if (err) {
       reject(err)
     } else {
-      // publish the new Port, necessary for e2e tests
-      console.log(port);
       process.env.PORT = port
-      // add port to devServer config
       devWebpackConfig.devServer.port = port
-
-      // // Add FriendlyErrorsPlugin
       devWebpackConfig.plugins.push(new FriendlyErrorsPlugin({
         compilationSuccessInfo: {
           messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`],
@@ -119,7 +117,6 @@ module.exports = new Promise((resolve, reject) => {
         ? utils.createNotifierCallback()
         : undefined
       }))
-
       resolve(devWebpackConfig)
     }
   })

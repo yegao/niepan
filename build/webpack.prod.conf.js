@@ -57,7 +57,6 @@ const webpackConfig = merge(baseWebpackConfig, {
     runtimeChunk:true
   },
   plugins: [
-    new NpWebpackPlugin(),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': env
@@ -104,6 +103,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       // necessary to consistently work with multiple chunks via CommonsChunkPlugin
       chunksSortMode: 'dependency'
     }),
+    new NpWebpackPlugin(),
     // keep module.id stable when vendor modules does not change
     new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
