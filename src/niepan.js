@@ -55,6 +55,90 @@
       });
       return res;
     },
+
+    //beta start
+    vnode: function(tag, data, children, text) {
+      this.tag = tag;
+      this.data = data;
+      this.children = children;
+      this.text = text;
+    },
+    createEle: function(vnode) {
+      var tag = vnode.tag;
+      var data = vnode.data;
+      var children = vnode.children;
+      if (tag !== undefined) {
+        vnode.elm = document.createElement(tag);
+        if (data.attrs !== undefined) {
+          var attrs = data.attrs;
+          for (var key in attrs) {
+            vnode.elm.setAttribute(key, attrs[key])
+          }
+        }
+        if (children) {
+          this.createChildren(vnode, children)
+        }
+      } else {
+        vnode.elm = document.createTextNode(vnode.text);
+      }
+      return vnode.elm;
+    },
+    createChildren: function(vnode, children) {
+      for (var i = 0; i < children.length; ++i) {
+        vnode.elm.appendChild(this.createElm(children[i]));
+      }
+    },
+    patch: function(oldVnode, vnode) {
+      this.createElm(vnode)
+      var isRealElement = oldVnode.nodeType !== undefined; // 虚拟节点没有nodeType属性
+      if (isRealElement) {
+        var parent = oldVnode.parentNode;
+        if (parent) {
+          parent.insertBefore(vnode.elm, oldVnode);
+          parent.removeChild(oldVnode);
+        }
+      }
+      return vnode.elm
+    },
+    render: function(component) {
+      var vnode = this.vnode;
+      // component转成
+      // {
+      //   tag,
+      //   attr,
+      //   children,
+      //   text
+      // }
+      //例如：
+      var params = [
+        'div',
+        {
+          attrs: {
+            'class': 'wrapper'
+          }
+        },
+        [
+          new vnode(
+            'p',
+            {
+              attrs: {
+                'class': 'inner'
+              }
+            },
+            [
+              new vnode(undefined, undefined, undefined, 'Hello world')
+            ]
+          )
+        ]
+      ];
+      return new vnode(params);
+    },
+    mount: function(el) {
+      var vnode = this.render();
+      this.patch(el, vnode)
+    },
+    //beta end
+
     /**
      * @todo需不需要将插入的子节点转成niepan,或者是添加一个参数来控制?
      * @param  {[object|string]} elementOrString [description]
