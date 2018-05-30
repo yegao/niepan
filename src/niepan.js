@@ -1,3 +1,5 @@
+import utils from  './utils.js'
+console.log(utils);
 (function(global, undefined) {
 
   //防止重复加载niepan.js
@@ -5,160 +7,15 @@
     return;
   }
 
-  //达到np()等价于new np()的目的
+  //np() <=> new np()
   var np = function(element = null) {
     return np.prototype.create(np.prototype, element);
   }
 
-  //原型属性
   np.prototype = {
     //内部静态变量,最好不要动
     version: '1.0.7',
     copyright: '@yegao',
-    /**
-     * @todo 抽象语法树
-     * @param  {[type]} element [description]
-     * @param  {[type]} _index  [description]
-     * @param  {[type]} _res    [description]
-     * @return {[type]}         [description]
-     */
-    ast: function(element, _index, _res) {
-      // if(Object.prototype.toString.call(element) === "[object Array]"){
-      //   console.warn('the ast get multiple trees');
-      //   return ;
-      // }
-      if (!element) {
-        return;
-      }
-      /********************************************************************************************
-       *     ·[3]                                                                                 *
-       *     ·[2]            ·[2]                            ·[4]                                 *
-       *     ·[3]            ·[3]            ·[3]            ·[2]        ·[2]        ·[0]    ·[1] *
-       *     ·[0]·[0]·[0]    ·[0]·[0]·[0]    ·[0]·[0]·[0]    ·[0]·[0]    ·[0]·[0]            ·[0] *
-       ********************************************************************************************/
-      var index = _index || 0;
-      var res = _res || [];
-      //nodeType 1的比如img的childElementCount为0 nodeType为3的txt没有childElementCount
-      if (element.childElementCount) {
-        var children = element.childNodes;
-        for (var index of children) {
-          var child = children[index];
-          child.index = element.index + '|' + index;
-          return this.ast(child, res);
-        }
-      }
-      res.push({
-        nodeName: element.nodeName,
-        childNodes: element.childNodes,
-        parent: parentIndex || 0,
-        nodeType: element.nodeType
-      });
-      return res;
-    },
-
-    //beta start
-    vnode: function(tag, data, children, text) {
-      this.tag = tag;
-      this.data = data;
-      this.children = children;
-      this.text = text;
-    },
-    createEle: function(vnode) {
-      var tag = vnode.tag;
-      var data = vnode.data;
-      var children = vnode.children;
-      if (tag !== undefined) {
-        vnode.elm = document.createElement(tag);
-        if (data.attrs !== undefined) {
-          var attrs = data.attrs;
-          for (var key in attrs) {
-            vnode.elm.setAttribute(key, attrs[key])
-          }
-        }
-        if (children) {
-          this.createChildren(vnode, children)
-        }
-      } else {
-        vnode.elm = document.createTextNode(vnode.text);
-      }
-      return vnode.elm;
-    },
-    createChildren: function(vnode, children) {
-      for (var i = 0; i < children.length; ++i) {
-        vnode.elm.appendChild(this.createElm(children[i]));
-      }
-    },
-    patch: function(oldVnode, vnode) {
-      this.createElm(vnode)
-      var isRealElement = oldVnode.nodeType !== undefined; // 虚拟节点没有nodeType属性
-      if (isRealElement) {
-        var parent = oldVnode.parentNode;
-        if (parent) {
-          parent.insertBefore(vnode.elm, oldVnode);
-          parent.removeChild(oldVnode);
-        }
-      }
-      return vnode.elm
-    },
-    render: function(component) {
-      var vnode = this.vnode;
-      // component转成
-      // {
-      //   tag,
-      //   attr,
-      //   children,
-      //   text
-      // }
-      //例如：
-      var params = [
-        'div',
-        {
-          attrs: {
-            'class': 'wrapper'
-          }
-        },
-        [
-          new vnode(
-            'p',
-            {
-              attrs: {
-                'class': 'inner'
-              }
-            },
-            [
-              new vnode(undefined, undefined, undefined, 'Hello world')
-            ]
-          )
-        ]
-      ];
-      return new vnode(params);
-    },
-    mount: function(el) {
-      var vnode = this.render();
-      this.patch(el, vnode)
-    },
-    //beta end
-
-    /**
-     * @todo需不需要将插入的子节点转成niepan,或者是添加一个参数来控制?
-     * @param  {[object|string]} elementOrString [description]
-     * @param  {[object]} parentNode      [description]
-     * @return {[object]}                 [description]
-     */
-    append: function(elementOrString, parentNode) {
-      if (!parentNode || typeof parentNode != 'object') {
-        throw new Error('you append a element to a undefined parent node');
-      }
-      switch (typeof elementOrString) {
-        case 'object':
-          return parentNode.appendChild(elementOrString);
-        case 'string':
-          parentNode.innerHTML += elementOrString;
-          return ast(elementOrString)
-        default:
-          throw new Error('you append a element to a undefined parent node');
-      }
-    },
     /**
      * 以prototype为原型创建一个对象，该对象的element属性为element
      * @todo 是否需要合并重复的niepan,脏检查或者直接将元素上的事件就直接放到元素上，仔细一想也没什么必要...待定
@@ -171,46 +28,44 @@
         if (element.$np) {
           throw new Error('this element has been a niepan');
         }
+        //每个被niepan加工过的element都有一个$np属性，且值为true
         element.$np = true;
       }
-      // 实例属性都有一个$符号,和原型属性作区分
+      // 实例属性都有一个$符号,原型属性没有$符号
       var init = function() {
+        const that = this;
         //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
-        this.$element = element;
+        that.$element = element;
         //当前实例绑定的变量全部放在$data中
-        this.$data = {};
+        that.$data = {};
         //元素原本就有的事件监听类型
-        this.$originals = [];
+        that.$originals = [];
         //listeners = originals + unoriginals
-        this.$listeners = [];
-        //watch 实现双向绑定
-        this.$watch = element && element.getAttribute('watch');
-        if (this.$watch) {
-          if (typeof this.$watch != 'string') {
+        that.$listeners = [];
+        //实现that.$data[$that.$watch]的双向绑定
+        that.$watch = element && element.getAttribute('watch');
+        if (that.$watch) {
+          if (typeof that.$watch != 'string') {
             throw new Error('the attribute "watch" should be a string!');
           }
-          // 发现不能重写element.__proto__.value的setter方法（native code）
-          // console.log(Object.getOwnPropertyDescriptor(this.$element.constructor.prototype,'value').set);
-          // Object.getOwnPropertyDescriptor(this.$element.constructor.prototype,'value').set = function(){
-          //   console.log('xxx');
-          // }
-          Object.defineProperty(this.$data, this.$watch, {
+          Object.defineProperties(that.$data, utils.attachValue(that.$watch,{
+            enumerable: true,
+            configurable: true,
             set: (function(v) {
-              this.$element.value = v;
-            }).bind(this),
+              that.$element.value = v;
+            }),
             get: (function() {
-              return this.$element.value;
-            }).bind(this)
-          })
+              return that.$element.value;
+            })
+          }))
         }
         //状态
-        this.$status = {};
-        this.$set = function(k, v) {
-          this.$status[k] = v;
-          return this.$status;
+        that.$set = function(k, v) {
+          that.$data[k] = v;
+          return that.$data;
         };
-        this.$get = function(k) {
-          return this.$status[k];
+        that.$get = function(k) {
+          return that.$data[k];
         }
       };
       // 原型属性

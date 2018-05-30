@@ -1,9 +1,16 @@
-<np name="list">
-<ul id="npcomponent">
-  <li>np1</li>
-  <li>np2</li>
-</ul>
-</np>
-<style>
-
-</style>
+<element name="list">
+  <ul id="npcomponent">
+    <li onclick="a()">np1</li>
+    <li onclick="b(3)">np2</li>
+  </ul>
+  <style>
+    li{
+      color:#ff0000;
+    }
+  </style>
+</element>
+<niepan>
+watch:"    ",
+a(){},
+b(x){console.log(x)}
+</niepan>

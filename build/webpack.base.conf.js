@@ -21,7 +21,7 @@ module.exports = {
   },
   resolve: {
     //require('./a')就可能去找./a.js、./a.vue、./a.json
-    extensions: ['.js', '.np', '.json'],
+    extensions: ['.js', '.json', '.np'],
     //require('@/a')相当于require('src/a')
     alias: {
       '@': resolve('src'),
