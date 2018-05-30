@@ -1,1 +1,17 @@
-<!DOCTYPE html><html lang=en><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><title>niepan example</title></head><body><ul id=ul><li id=li1>1</li><li id=li2>2</li><li id=li3 watch=age>4</li></ul>this is niepan component<input np id=input1 type=text value="" watch=name placeholder="place input your name"><div></div><script type=text/javascript src=/static/js/runtime~app.ed56e4babb89911abd54.js></script><script type=text/javascript src=/static/js/1.fa37f57b06b721c4e219.js></script><script type=text/javascript src=/static/js/2.61c44f683e74b933515a.js></script></body></html>
+<!DOCTYPE html><html lang=en><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><meta http-equiv=X-UA-Compatible content="ie=edge"><title>niepan example</title></head><body><ul id=ul><li id=li1>1</li><li id=li2>2</li><li id=li3 watch=age>4</li></ul><template name="list">
+  <ul id="npcomponent">
+    <li onclick="a()">np1</li>
+    <li onclick="b(3)">np2</li>
+  </ul>
+</template>
+<niepan>
+watch:"    ",
+a(){},
+b(x){console.log(x)}
+</niepan>
+<style>
+  li{
+    color:#ff0000;
+  }
+</style>
+<input np id=input1 type=text value="" watch=name placeholder="place input your name"><div></div><script type=text/javascript src=/static/js/runtime~app.ed56e4babb89911abd54.js></script><script type=text/javascript src=/static/js/1.fa37f57b06b721c4e219.js></script><script type=text/javascript src=/static/js/2.d6b233663b9c0b588ef1.js></script></body></html>

@@ -1,16 +1,16 @@
-<element name="list">
+<template name="list">
   <ul id="npcomponent">
     <li onclick="a()">np1</li>
     <li onclick="b(3)">np2</li>
   </ul>
-  <style>
-    li{
-      color:#ff0000;
-    }
-  </style>
-</element>
+</template>
 <niepan>
 watch:"    ",
 a(){},
 b(x){console.log(x)}
 </niepan>
+<style>
+  li{
+    color:#ff0000;
+  }
+</style>

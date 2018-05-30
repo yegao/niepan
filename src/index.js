@@ -1,7 +1,7 @@
 //np-loader会
-// var content = require('./index.np');
-// console.log(content);
 const niepan = require('./niepan.js');
+var content = require('./components/list.np');
+console.log(content);
 // console.log(niepan);
 var o = niepan();
 // console.log(o);
