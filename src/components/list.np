@@ -4,13 +4,13 @@
     <li onclick="b(3)">np2</li>
   </ul>
 </template>
-<niepan>
-watch:"    ",
+<script>
+watch:"",
 a(){},
 b(x){console.log(x)}
-</niepan>
+</script>
 <style>
-  li{
-    color:#ff0000;
-  }
+#npcomponent{
+  color:#0000ff;
+}
 </style>
