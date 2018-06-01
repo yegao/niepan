@@ -3,11 +3,13 @@
     <li onclick="a()">np1</li>
     <li onclick="b(3)">np2</li>
   </ul>
+  <np>./src/components/child.np</np>
 </template>
 <script>
-watch:"",
-a(){},
-b(x){console.log(x)}
+console.log('this is from list.np')
+//watch:"",
+//a(){},
+//b(x){console.log(x)}
 </script>
 <style>
 #npcomponent{
