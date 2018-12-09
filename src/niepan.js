@@ -7,11 +7,17 @@ console.log(utils);
     return;
   }
 
-  //np() <=> new np()
+  // np() <=> new np()
   var np = function(element = null) {
     return np.prototype.create(np.prototype, element);
   }
-
+  // 共享属性
+  np.store = {
+    data: {},  // 正常的全局属性
+    watch: {}, // 会被监听的属性
+    method: {} // 方法
+  }
+  // 实例自有属性
   np.prototype = {
     //内部静态变量,最好不要动
     version: '1.0.7',
@@ -237,6 +243,7 @@ console.log(utils);
       blacks: [], //黑名单列表
     }
   }
+
   // Commonjs
   if (typeof module === 'object' && typeof module.exports === 'object') {
     module.exports = np
