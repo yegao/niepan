@@ -6,17 +6,50 @@ console.log(utils);
   if (global.niepan && global.niepan.copyright === '@yegao') {
     return;
   }
-
+  // store
+  var store = {
+    data: {},  // 正常的全局属性
+    watch: {}, // 会被监听的属性
+    method: {}, // 方法
+    extend({data=null,watch=null,method=null}){
+      if(Object.prototype.toString.call(data) === '[object Object]'){
+        //es6 (for const key in data)
+        for(var dataKey in data){
+          store.data[dataKey] = data[dataKey];
+        }
+      }
+      if(Object.prototype.toString.call(watch) === '[object Object]'){
+        var watchKeys = Object.keys(watch);
+        var watchDescriptionMap = watchKeys.reduce(function(previous,current){
+          previous[current] = {
+            enumerable: true,
+            configurable: true,
+            set: function(value) {
+              watch[current] = value;
+              // 遍历所有的niepan,并将有用到该watchkey的组件全部重新渲染，包括该组件的所有子组件，当然如果该子组件一定没有用到该watchKey可以不用重新渲染
+            },
+            get: function() {
+              return watch[current];
+            }
+          }
+          return previous;
+        },{});
+        Object.defineProperties(store.watch,watchDescriptionMap);
+      }
+      if(Object.prototype.toString.call(method) === '[object Object]'){
+        for(var methodKey in method){
+          if(typeof method[methodKey] === 'function'){
+            store.method[methodKey] = method[methodKey];
+          }
+        }
+      }
+    }
+  }
   // np() <=> new np()
   var np = function(element = null) {
     return np.prototype.create(np.prototype, element);
   }
-  // 共享属性
-  np.store = {
-    data: {},  // 正常的全局属性
-    watch: {}, // 会被监听的属性
-    method: {} // 方法
-  }
+
   // 实例自有属性
   np.prototype = {
     //内部静态变量,最好不要动
@@ -40,6 +73,8 @@ console.log(utils);
       // 实例属性都有一个$符号,原型属性没有$符号
       var init = function() {
         const that = this;
+        //将全局store挂载到原型上
+        that.$store = store;
         //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
         that.$element = element;
         //当前实例绑定的变量全部放在$data中
@@ -57,12 +92,12 @@ console.log(utils);
           Object.defineProperties(that.$data, utils.attachValue(that.$watch,{
             enumerable: true,
             configurable: true,
-            set: (function(v) {
+            set: function(v) {
               that.$element.value = v;
-            }),
-            get: (function() {
+            },
+            get: function() {
               return that.$element.value;
-            })
+            }
           }))
         }
         //状态
