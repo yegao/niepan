@@ -6,45 +6,78 @@ console.log(utils);
   if (global.niepan && global.niepan.copyright === '@yegao') {
     return;
   }
+
+  var niepanTree = {};
+  var nextListeners = [];
   // store
   var store = {
-    data: {},  // 正常的全局属性
-    watch: {}, // 会被监听的属性
-    method: {}, // 方法
-    extend({data=null,watch=null,method=null}){
-      if(Object.prototype.toString.call(data) === '[object Object]'){
-        //es6 (for const key in data)
-        for(var dataKey in data){
-          store.data[dataKey] = data[dataKey];
-        }
+    state: {},  // 正常的全局属性
+    reducers: {},
+    // action: {},
+    subscribe(listener) {
+      nextListeners.push(listener)
+      return function unsubscribe() {
+        const index = nextListeners.indexOf(listener)
+        nextListeners.splice(index, 1)
       }
-      if(Object.prototype.toString.call(watch) === '[object Object]'){
-        var watchKeys = Object.keys(watch);
-        var watchDescriptionMap = watchKeys.reduce(function(previous,current){
-          previous[current] = {
-            enumerable: true,
-            configurable: true,
-            set: function(value) {
-              watch[current] = value;
-              // 遍历所有的niepan,并将有用到该watchkey的组件全部重新渲染，包括该组件的所有子组件，当然如果该子组件一定没有用到该watchKey可以不用重新渲染
-            },
-            get: function() {
-              return watch[current];
-            }
-          }
-          return previous;
-        },{});
-        Object.defineProperties(store.watch,watchDescriptionMap);
+    },
+    dispatch(key,action){
+      if (isDispatching) {
+        throw new Error('Reducers may not dispatch actions.')
       }
-      if(Object.prototype.toString.call(method) === '[object Object]'){
-        for(var methodKey in method){
-          if(typeof method[methodKey] === 'function'){
-            store.method[methodKey] = method[methodKey];
-          }
-        }
+      // 关键流程
+      try {
+        currentReducer = this.reducers[key]
+        isDispatching = true
+        currentState = currentReducer(currentState, action); //这里调用reducer(state, action)。
+      } finally {
+        isDispatching = false
       }
+  
+      const listeners = currentListeners = nextListeners
+      for (let i = 0; i < listeners.length; i++) {
+        const listener = listeners[i]
+        listener(); //这里调用store.subscribe注册进来的监听器
+      }
+  
+      return action
     }
+    // ,
+    // extend({data=null,watch=null,method=null}){
+    //   if(Object.prototype.toString.call(data) === '[object Object]'){
+    //     //es6 (for const key in data)
+    //     for(var dataKey in data){
+    //       store.data[dataKey] = data[dataKey];
+    //     }
+    //   }
+    //   if(Object.prototype.toString.call(watch) === '[object Object]'){
+    //     var watchKeys = Object.keys(watch);
+    //     var watchDescriptionMap = watchKeys.reduce(function(previous,current){
+    //       previous[current] = {
+    //         enumerable: true,
+    //         configurable: true,
+    //         set: function(value) {
+    //           watch[current] = value;
+    //           // 遍历所有的niepan,并将有用到该watchkey的组件全部重新渲染，包括该组件的所有子组件，当然如果该子组件一定没有用到该watchKey可以不用重新渲染
+    //         },
+    //         get: function() {
+    //           return watch[current];
+    //         }
+    //       }
+    //       return previous;
+    //     },{});
+    //     Object.defineProperties(store.watch,watchDescriptionMap);
+    //   }
+    //   if(Object.prototype.toString.call(method) === '[object Object]'){
+    //     for(var methodKey in method){
+    //       if(typeof method[methodKey] === 'function'){
+    //         store.method[methodKey] = method[methodKey];
+    //       }
+    //     }
+    //   }
+    // }
   }
+
   // np() <=> new np()
   var np = function(element = null) {
     return np.prototype.create(np.prototype, element);
@@ -111,7 +144,9 @@ console.log(utils);
       };
       // 原型属性
       init.prototype = prototype;
-      return new init;
+      var niepan = new init;
+      niepanTree[Symbol()] = niepan;
+      return niepan;
     },
     /**
     * 通过sub注册的事件如果是元素自带的系统事件，既可以通过pub触发也可以通过系统方式(比如点击鼠标)触发
