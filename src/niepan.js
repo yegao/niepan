@@ -1,5 +1,5 @@
 import utils from  './utils.js'
-console.log(utils);
+
 (function(global, undefined) {
 
   //防止重复加载niepan.js
@@ -192,7 +192,7 @@ console.log(utils);
     /**
      * 暴露store给外部调用
      */
-    store(){
+    get store(){
       return store;
     },
     /**
