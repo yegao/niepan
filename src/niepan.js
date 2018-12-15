@@ -9,11 +9,9 @@ console.log(utils);
 
   var niepanTree = {};
   var nextListeners = [];
-  // store
   var store = {
-    state: {},  // 正常的全局属性
+    state: {},
     reducers: {},
-    // action: {},
     subscribe(listener) {
       nextListeners.push(listener)
       return function unsubscribe() {
@@ -22,24 +20,13 @@ console.log(utils);
       }
     },
     dispatch(key,action){
-      if (isDispatching) {
-        throw new Error('Reducers may not dispatch actions.')
-      }
-      // 关键流程
-      try {
-        currentReducer = this.reducers[key]
-        isDispatching = true
-        currentState = currentReducer(currentState, action); //这里调用reducer(state, action)。
-      } finally {
-        isDispatching = false
-      }
-  
+      currentReducer = this.reducers[key]
+      currentState = currentReducer(currentState, action); //这里调用reducer(state, action)。
       const listeners = currentListeners = nextListeners
       for (let i = 0; i < listeners.length; i++) {
         const listener = listeners[i]
         listener(); //这里调用store.subscribe注册进来的监听器
       }
-  
       return action
     }
     // ,
@@ -86,7 +73,7 @@ console.log(utils);
   // 实例自有属性
   np.prototype = {
     //内部静态变量,最好不要动
-    version: '1.0.7',
+    version: '1.0.8',
     copyright: '@yegao',
     /**
      * 以prototype为原型创建一个对象，该对象的element属性为element
@@ -201,6 +188,12 @@ console.log(utils);
      */
     once: function(event, callback) {
       this.sub(event, callback, true);
+    },
+    /**
+     * 暴露store给外部调用
+     */
+    store(){
+      return store;
     },
     /**
      * 发送http请求
