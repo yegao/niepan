@@ -41,5 +41,21 @@ input1.sub('input',function(evt){
   console.log(input1.$data.name);
 });
 
+var remove1 = niepan(document.getElementById('remove1'));
+var remove2 = niepan(document.getElementById('remove2'));
+var remove3 = niepan(document.getElementById('remove3'));
+console.log(li3.tree)
+remove1.sub('click',function(){
+  remove1.$remove();
+  setTimeout(function(){
+    console.log(remove1)
+  },20);
+})
+remove2.sub('click',function(){
+  remove2.$remove();
+})
+remove3.sub('click',function(){
+  remove3.$remove();
+})
 // It will throw a error when define a niepan for the same element moe than one time;
 // var input2 = niepan(document.getElementById('input1'));//ERROR

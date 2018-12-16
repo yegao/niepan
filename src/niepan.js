@@ -8,6 +8,7 @@ import utils from  './utils.js'
   }
 
   var niepanTree = {};
+
   var nextListeners = [];
   var store = {
     state: {},
@@ -29,45 +30,77 @@ import utils from  './utils.js'
       }
       return action
     }
-    // ,
-    // extend({data=null,watch=null,method=null}){
-    //   if(Object.prototype.toString.call(data) === '[object Object]'){
-    //     //es6 (for const key in data)
-    //     for(var dataKey in data){
-    //       store.data[dataKey] = data[dataKey];
-    //     }
-    //   }
-    //   if(Object.prototype.toString.call(watch) === '[object Object]'){
-    //     var watchKeys = Object.keys(watch);
-    //     var watchDescriptionMap = watchKeys.reduce(function(previous,current){
-    //       previous[current] = {
-    //         enumerable: true,
-    //         configurable: true,
-    //         set: function(value) {
-    //           watch[current] = value;
-    //           // 遍历所有的niepan,并将有用到该watchkey的组件全部重新渲染，包括该组件的所有子组件，当然如果该子组件一定没有用到该watchKey可以不用重新渲染
-    //         },
-    //         get: function() {
-    //           return watch[current];
-    //         }
-    //       }
-    //       return previous;
-    //     },{});
-    //     Object.defineProperties(store.watch,watchDescriptionMap);
-    //   }
-    //   if(Object.prototype.toString.call(method) === '[object Object]'){
-    //     for(var methodKey in method){
-    //       if(typeof method[methodKey] === 'function'){
-    //         store.method[methodKey] = method[methodKey];
-    //       }
-    //     }
-    //   }
-    // }
+  }
+  /**
+   * 以prototype为原型创建一个对象，该对象的element属性为element
+   * @todo 是否需要合并重复的niepan,脏检查或者直接将元素上的事件就直接放到元素上，仔细一想也没什么必要...待定
+   * @param  {object} prototype 原型
+   * @param  {object} element   niepan对绑定的元素
+   * @return {object}           生成的niepan
+   */
+  var create = function(prototype, element) {
+    if (element) {
+      if (element.$np) {
+        throw new Error('this element has been a niepan');
+      }
+      //每个被niepan加工过的element都有一个$np属性，且值为true
+      element.$np = true;
+    }
+    // 实例属性都有一个$符号,原型属性没有$符号
+    var init = function() {
+      let that = this;
+      that.$symbol = Symbol('np');
+      //将全局store挂载到原型上
+      that.$store = store;
+      //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
+      that.$element = element;
+      //当前实例绑定的变量全部放在$data中
+      that.$data = {};
+      //元素原本就有的事件监听类型
+      that.$originals = [];
+      //listeners = originals + unoriginals
+      that.$listeners = [];
+      //实现that.$data[$that.$watch]的双向绑定
+      that.$watch = element && element.getAttribute('watch');
+      if (that.$watch) {
+        if (typeof that.$watch != 'string') {
+          throw new Error('the attribute "watch" should be a string!');
+        }
+        Object.defineProperties(that.$data, utils.attachValue(that.$watch,{
+          enumerable: true,
+          configurable: true,
+          set: function(v) {
+            that.$element.value = v;
+          },
+          get: function() {
+            return that.$element.value;
+          }
+        }))
+      }
+      //状态
+      that.$set = function(k, v) {
+        that.$data[k] = v;
+        return that.$data;
+      };
+      that.$get = function(k) {
+        return that.$data[k];
+      }
+      // 删除真实dom和挂载在niepanTree上的niepan，以及该
+      that.$remove = function(){
+        that.$element.parentNode.removeChild(that.$element);
+        delete niepanTree[that.$symbol];
+      }
+    };
+    // 原型属性
+    init.prototype = prototype;
+    var niepan = new init;
+    niepanTree[niepan.$symbol] = niepan;
+    return niepan;
   }
 
   // np() <=> new np()
   var np = function(element = null) {
-    return np.prototype.create(np.prototype, element);
+    return create(np.prototype, element);
   }
 
   // 实例自有属性
@@ -75,66 +108,6 @@ import utils from  './utils.js'
     //内部静态变量,最好不要动
     version: '1.0.8',
     copyright: '@yegao',
-    /**
-     * 以prototype为原型创建一个对象，该对象的element属性为element
-     * @todo 是否需要合并重复的niepan,脏检查或者直接将元素上的事件就直接放到元素上，仔细一想也没什么必要...待定
-     * @param  {object} prototype 原型
-     * @param  {object} element   niepan对绑定的元素
-     * @return {object}           生成的niepan
-     */
-    create: function(prototype, element) {
-      if (element) {
-        if (element.$np) {
-          throw new Error('this element has been a niepan');
-        }
-        //每个被niepan加工过的element都有一个$np属性，且值为true
-        element.$np = true;
-      }
-      // 实例属性都有一个$符号,原型属性没有$符号
-      var init = function() {
-        const that = this;
-        //将全局store挂载到原型上
-        that.$store = store;
-        //传参里的element的优先级最高，如果没有传element就检查有没有定义template函数
-        that.$element = element;
-        //当前实例绑定的变量全部放在$data中
-        that.$data = {};
-        //元素原本就有的事件监听类型
-        that.$originals = [];
-        //listeners = originals + unoriginals
-        that.$listeners = [];
-        //实现that.$data[$that.$watch]的双向绑定
-        that.$watch = element && element.getAttribute('watch');
-        if (that.$watch) {
-          if (typeof that.$watch != 'string') {
-            throw new Error('the attribute "watch" should be a string!');
-          }
-          Object.defineProperties(that.$data, utils.attachValue(that.$watch,{
-            enumerable: true,
-            configurable: true,
-            set: function(v) {
-              that.$element.value = v;
-            },
-            get: function() {
-              return that.$element.value;
-            }
-          }))
-        }
-        //状态
-        that.$set = function(k, v) {
-          that.$data[k] = v;
-          return that.$data;
-        };
-        that.$get = function(k) {
-          return that.$data[k];
-        }
-      };
-      // 原型属性
-      init.prototype = prototype;
-      var niepan = new init;
-      niepanTree[Symbol()] = niepan;
-      return niepan;
-    },
     /**
     * 通过sub注册的事件如果是元素自带的系统事件，既可以通过pub触发也可以通过系统方式(比如点击鼠标)触发
     * 通过sub注册的事件如果是自定义的事件，只能通过pub触发
@@ -194,6 +167,9 @@ import utils from  './utils.js'
      */
     get store(){
       return store;
+    },
+    get tree(){
+      return niepanTree
     },
     /**
      * 发送http请求
@@ -313,6 +289,7 @@ import utils from  './utils.js'
   } else {
     throw new Error('current environment do not support niepan');
   }
+
   //global、amd、cmd、
   if (global) {
     global.niepan = np;
@@ -327,4 +304,5 @@ import utils from  './utils.js'
       })
     }
   }
+
 })(window || this);
