@@ -48,7 +48,7 @@ console.log(li3.tree)
 remove1.sub('click',function(){
   remove1.$remove();
   setTimeout(function(){
-    console.log(remove1)
+    console.log(remove1.$element)
   },20);
 })
 remove2.sub('click',function(){

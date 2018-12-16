@@ -7,8 +7,8 @@ import utils from  './utils.js'
     return;
   }
 
-  var niepanTree = {};
-
+  var structure = {}; // {symbol1:np1,symbol2:np2}
+  var ashes = [];     // [{symbol:symbol3,type:,describe:}]   type:交换、删除、添加、修改
   var nextListeners = [];
   var store = {
     state: {},
@@ -85,16 +85,17 @@ import utils from  './utils.js'
       that.$get = function(k) {
         return that.$data[k];
       }
-      // 删除真实dom和挂载在niepanTree上的niepan，以及该
+      // 删除真实dom和挂载在structure上的niepan，以及该
       that.$remove = function(){
         that.$element.parentNode.removeChild(that.$element);
-        delete niepanTree[that.$symbol];
+        delete structure[that.$symbol];
+        ashes.push({symbol:that.$symbol,type:'remove'})
       }
     };
     // 原型属性
     init.prototype = prototype;
     var niepan = new init;
-    niepanTree[niepan.$symbol] = niepan;
+    structure[niepan.$symbol] = niepan;
     return niepan;
   }
 
@@ -169,7 +170,7 @@ import utils from  './utils.js'
       return store;
     },
     get tree(){
-      return niepanTree
+      return structure
     },
     /**
      * 发送http请求
